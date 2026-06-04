@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OncoNourish — Clinician-prescribed nutrition for oncology patients</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --green: #0e5945;
+    --green-deep: #093c2e;
+    --green-700: #14624d;
+    --sage: #6fb89c;
+    --sage-soft: #a9d3c1;
+    --clay: #cf7d4f;
+    --clay-deep: #b5642f;
+    --ink: #16241f;
+    --ink-soft: #41544c;
+    --muted: #6c7d75;
+    --paper: #f6f8f4;
+    --paper-warm: #f1f4ec;
+    --card: #ffffff;
+    --mint: #e8f1ea;
+    --mint-deep: #d8e9df;
+    --line: #dde6df;
+    --line-strong: #c8d4cb;
+    --amber-bg: #f7ecd6;
+    --amber-ink: #976219;
+    --amber-line: #e6d2a8;
+    --shadow-sm: 0 1px 2px rgba(9,60,46,.05), 0 1px 1px rgba(9,60,46,.04);
+    --shadow-md: 0 18px 40px -24px rgba(9,60,46,.28), 0 4px 12px -8px rgba(9,60,46,.16);
+    --shadow-lg: 0 40px 80px -40px rgba(9,60,46,.38), 0 8px 24px -12px rgba(9,60,46,.18);
+    --maxw: 1180px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: .035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  h1, h2, h3, h4 { font-family: "Newsreader", Georgia, serif; font-weight: 500; letter-spacing: -.01em; margin: 0; color: var(--ink); }
+  p { margin: 0; }
+  a { color: inherit; text-decoration: none; }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 40px; }
+  .mono { font-family: "IBM Plex Mono", monospace; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--green);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .eyebrow::before { content: ""; width: 22px; height: 1px; background: var(--sage); display: inline-block; }
+
+  /* ---------- NAV ---------- */
+  header.nav {
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(14px);
+    background: rgba(246,248,244,.82);
+    border-bottom: 1px solid transparent;
+    transition: border-color .3s, background .3s;
+  }
+  header.nav.scrolled { border-bottom-color: var(--line); background: rgba(246,248,244,.92); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 70px; }
+  .brand { display: flex; align-items: center; gap: 11px; font-family: "Newsreader", serif; font-weight: 600; font-size: 22px; letter-spacing: -.02em; }
+  .brand .mark {
+    width: 30px; height: 30px; border-radius: 9px;
+    background: linear-gradient(150deg, var(--green) 0%, var(--green-deep) 100%);
+    display: grid; place-items: center; box-shadow: var(--shadow-sm);
+    flex: none;
+  }
+  .brand .mark svg { width: 18px; height: 18px; }
+  .brand b { color: var(--green); font-weight: 600; }
+  .nav-links { display: flex; align-items: center; gap: 30px; }
+  .nav-links a { font-size: 14.5px; color: var(--ink-soft); font-weight: 500; transition: color .2s; white-space: nowrap; }
+  .nav-links a:hover { color: var(--green); }
+  .nav-cta {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 14px; font-weight: 600;
+    padding: 9px 18px; border-radius: 999px;
+    background: var(--green); color: #fff;
+    box-shadow: var(--shadow-sm);
+    transition: transform .2s, background .2s;
+    white-space: nowrap;
+  }
+  .nav-cta:hover { background: var(--green-deep); transform: translateY(-1px); }
+  .nav-toggle { display: none; }
+
+  /* ---------- HERO ---------- */
+  .hero { position: relative; padding: 78px 0 40px; overflow: hidden; }
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(60% 50% at 82% 8%, rgba(111,184,156,.20), transparent 70%),
+      radial-gradient(50% 45% at 6% 30%, rgba(207,125,79,.10), transparent 70%);
+  }
+  .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: center; }
+  .hero h1 { font-size: clamp(40px, 5.4vw, 67px); line-height: 1.02; margin: 22px 0 0; letter-spacing: -.025em; }
+  .hero h1 em { font-style: italic; color: var(--green); }
+  .hero .lede { font-size: 19px; color: var(--ink-soft); margin-top: 22px; max-width: 36ch; }
+  .hero-cta { display: flex; gap: 14px; margin-top: 32px; flex-wrap: wrap; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-weight: 600; font-size: 15px; padding: 13px 24px; border-radius: 999px;
+    cursor: pointer; transition: transform .2s, box-shadow .2s, background .2s; border: none;
+  }
+  .btn-primary { background: var(--green); color: #fff; box-shadow: var(--shadow-md); }
+  .btn-primary:hover { transform: translateY(-2px); background: var(--green-deep); }
+  .btn-ghost { background: transparent; color: var(--green); border: 1px solid var(--line-strong); }
+  .btn-ghost:hover { border-color: var(--green); background: var(--mint); }
+  .btn svg { width: 16px; height: 16px; }
+
+  .disclaimer-chip {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-size: 12.5px; color: var(--amber-ink); font-weight: 500;
+    background: var(--amber-bg); border: 1px solid var(--amber-line);
+    padding: 7px 14px; border-radius: 999px; margin-top: 26px;
+  }
+  .disclaimer-chip svg { width: 14px; height: 14px; flex: none; }
+
+  /* hero product card */
+  .hero-card-stack { position: relative; }
+  .chart-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 20px;
+    box-shadow: var(--shadow-lg); padding: 22px; position: relative; z-index: 2;
+  }
+  .chart-card .cc-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+  .cc-patient { display: flex; align-items: center; gap: 11px; }
+  .cc-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--mint-deep); color: var(--green); display: grid; place-items: center; font-family: "Newsreader", serif; font-weight: 600; font-size: 16px; }
+  .cc-name { font-weight: 600; font-size: 15px; }
+  .cc-sub { font-size: 12px; color: var(--muted); font-family: "IBM Plex Mono", monospace; }
+  .badge-approved { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--green); background: var(--mint); border: 1px solid var(--sage-soft); padding: 5px 9px; border-radius: 7px; font-weight: 500; display: inline-flex; gap: 6px; align-items: center; }
+  .badge-approved::before { content:""; width: 6px; height: 6px; border-radius: 50%; background: var(--sage); }
+
+  .cc-targets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+  .target { background: var(--paper-warm); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+  .target .t-num { font-family: "Newsreader", serif; font-size: 25px; font-weight: 600; color: var(--green); line-height: 1; }
+  .target .t-num small { font-size: 12px; font-family: "IBM Plex Mono", monospace; color: var(--muted); font-weight: 400; }
+  .target .t-label { font-size: 11px; color: var(--muted); margin-top: 5px; text-transform: uppercase; letter-spacing: .05em; font-family: "IBM Plex Mono", monospace; }
+
+  .cc-section-label { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); margin: 16px 0 9px; display: flex; align-items: center; gap: 7px; }
+  .cc-section-label .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip { font-size: 12.5px; padding: 5px 11px; border-radius: 8px; font-weight: 500; }
+  .chip.fav { background: var(--mint); color: var(--green-deep); border: 1px solid var(--mint-deep); }
+  .chip.avoid { background: #fbeee8; color: var(--clay-deep); border: 1px solid #f1d8ca; }
+  .chip.avoid::before { content: "−"; margin-right: 4px; opacity:.7; }
+  .chip.fav::before { content: "+"; margin-right: 4px; opacity:.7; }
+
+  .float-tag {
+    position: absolute; z-index: 3; background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; box-shadow: var(--shadow-md); padding: 11px 13px; display: flex; gap: 10px; align-items: center;
+  }
+  .float-tag .ft-ico { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; flex: none; }
+  .float-tag .ft-t { font-size: 12.5px; font-weight: 600; line-height: 1.2; }
+  .float-tag .ft-s { font-size: 11px; color: var(--muted); font-family: "IBM Plex Mono", monospace; }
+  .float-why { top: -22px; left: -34px; }
+  .float-why .ft-ico { background: var(--mint); color: var(--green); }
+  .float-rule { bottom: -24px; right: -28px; }
+  .float-rule .ft-ico { background: var(--amber-bg); color: var(--amber-ink); }
+
+  /* ---------- trust strip ---------- */
+  .trust { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--paper-warm); margin-top: 56px; }
+  .trust-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 22px 0; flex-wrap: wrap; }
+  .trust-label { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .trust-items { display: flex; gap: 30px; flex-wrap: wrap; }
+  .trust-item { display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 500; color: var(--ink-soft); }
+  .trust-item svg { width: 17px; height: 17px; color: var(--green); flex: none; }
+
+  /* ---------- section scaffolding ---------- */
+  section.block { padding: 96px 0; position: relative; }
+  .sec-head { max-width: 660px; margin-bottom: 52px; }
+  .sec-head.center { margin-left: auto; margin-right: auto; text-align: center; }
+  .sec-head h2 { font-size: clamp(31px, 3.8vw, 45px); line-height: 1.07; margin-top: 16px; }
+  .sec-head h2 em { font-style: italic; color: var(--green); }
+  .sec-head p { color: var(--ink-soft); font-size: 18px; margin-top: 16px; }
+
+  /* ---------- positioning ---------- */
+  .pos { background: var(--green-deep); color: #eaf3ee; position: relative; overflow: hidden; }
+  .pos::after { content:""; position:absolute; inset:0; pointer-events:none;
+    background: radial-gradient(50% 60% at 88% 0%, rgba(111,184,156,.22), transparent 65%); }
+  .pos .wrap { position: relative; z-index: 1; }
+  .pos .eyebrow { color: var(--sage-soft); }
+  .pos .eyebrow::before { background: var(--sage); }
+  .pos h2 { color: #fff; }
+  .pos h2 em { color: var(--sage-soft); }
+  .pos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .pos-quote { font-family: "Newsreader", serif; font-size: clamp(27px,3.2vw,38px); line-height: 1.22; color: #fff; letter-spacing: -.01em; }
+  .pos-quote .hl { color: var(--sage-soft); font-style: italic; }
+  .pos-claims { display: grid; gap: 14px; }
+  .claim { display: flex; gap: 14px; align-items: flex-start; padding: 16px 18px; border-radius: 14px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.10); }
+  .claim .ci { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; flex: none; }
+  .claim.yes .ci { background: rgba(111,184,156,.22); color: var(--sage-soft); }
+  .claim.no .ci { background: rgba(207,125,79,.20); color: #e7a577; }
+  .claim h4 { color: #fff; font-family: "IBM Plex Sans", sans-serif; font-size: 15px; font-weight: 600; }
+  .claim p { font-size: 13.5px; color: #b9cec5; margin-top: 3px; }
+
+  /* ---------- how it works ---------- */
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative; }
+  .flow-step { padding: 0 26px; position: relative; }
+  .flow-step:not(:last-child)::after {
+    content:""; position: absolute; top: 26px; right: -1px; width: 1px; height: calc(100% - 26px);
+    background: var(--line);
+  }
+  .flow-num {
+    width: 52px; height: 52px; border-radius: 14px; background: var(--card); border: 1px solid var(--line);
+    display: grid; place-items: center; margin-bottom: 20px; box-shadow: var(--shadow-sm); position: relative;
+  }
+  .flow-num span { font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--muted); position: absolute; top: 7px; left: 9px; }
+  .flow-num svg { width: 24px; height: 24px; color: var(--green); }
+  .flow-actor { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--clay-deep); font-weight: 500; }
+  .flow-step h3 { font-size: 21px; margin: 7px 0 9px; }
+  .flow-step p { font-size: 14.5px; color: var(--ink-soft); }
+  .flow-gate { margin-top: 12px; display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-family: "IBM Plex Mono", monospace; color: var(--green); background: var(--mint); border: 1px solid var(--mint-deep); padding: 4px 10px; border-radius: 7px; }
+  .flow-gate svg { width: 13px; height: 13px; }
+
+  /* ---------- profile ---------- */
+  .profile { background: var(--paper-warm); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .pcard { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; transition: transform .25s, box-shadow .25s, border-color .25s; }
+  .pcard:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--sage-soft); }
+  .pcard .pico { width: 40px; height: 40px; border-radius: 11px; background: var(--mint); color: var(--green); display: grid; place-items: center; margin-bottom: 15px; }
+  .pcard .pico svg { width: 21px; height: 21px; }
+  .pcard h4 { font-size: 18px; margin-bottom: 6px; }
+  .pcard p { font-size: 14px; color: var(--ink-soft); }
+  .pcard .ptags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .ptag { font-size: 11.5px; font-family: "IBM Plex Mono", monospace; color: var(--ink-soft); background: var(--paper-warm); border: 1px solid var(--line); padding: 3px 8px; border-radius: 6px; }
+
+  .scope-note { margin-top: 28px; display: flex; align-items: center; gap: 16px; padding: 18px 22px; background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--clay); border-radius: 14px; }
+  .scope-note .sn-label { font-family: "IBM Plex Mono", monospace; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--clay-deep); flex: none; }
+  .scope-note .sn-body { font-size: 14.5px; color: var(--ink-soft); }
+  .scope-note .sn-body strong { color: var(--ink); }
+
+  /* ---------- engine ---------- */
+  .engine-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .layer { border-radius: 20px; padding: 30px; position: relative; overflow: hidden; }
+  .layer-rules { background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow-sm); }
+  .layer-llm { background: linear-gradient(160deg, var(--green) 0%, var(--green-deep) 100%); color: #eaf3ee; }
+  .layer-tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 500; padding: 5px 11px; border-radius: 999px; display: inline-block; }
+  .layer-rules .layer-tag { background: var(--mint); color: var(--green); border: 1px solid var(--mint-deep); }
+  .layer-llm .layer-tag { background: rgba(255,255,255,.14); color: #eaf3ee; }
+  .layer h3 { font-size: 25px; margin: 16px 0 10px; }
+  .layer-llm h3 { color: #fff; }
+  .layer > p { font-size: 14.5px; color: var(--ink-soft); }
+  .layer-llm > p { color: #c2d6cc; }
+  .rule-snippet { margin-top: 18px; background: #0d211b; border-radius: 13px; padding: 16px 18px; font-family: "IBM Plex Mono", monospace; font-size: 12.5px; line-height: 1.7; color: #cfe3d8; overflow-x: auto; }
+  .rule-snippet .k { color: var(--sage-soft); }
+  .rule-snippet .s { color: #e7b98c; }
+  .rule-snippet .c { color: #6f8a7f; }
+  .llm-list { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 11px; }
+  .llm-list li { display: flex; gap: 11px; font-size: 14px; align-items: flex-start; color: #d6e6dd; }
+  .llm-list li svg { width: 16px; height: 16px; color: var(--sage-soft); flex: none; margin-top: 2px; }
+
+  .trace { margin-top: 22px; display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; background: var(--card); border: 1px dashed var(--line-strong); border-radius: 16px; padding: 20px 24px; }
+  .trace-flow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .trace-node { font-family: "IBM Plex Mono", monospace; font-size: 12px; padding: 7px 12px; border-radius: 9px; background: var(--paper-warm); border: 1px solid var(--line); color: var(--ink-soft); white-space: nowrap; }
+  .trace-node.hl { background: var(--mint); border-color: var(--sage-soft); color: var(--green-deep); }
+  .trace-arrow { color: var(--sage); flex: none; }
+  .trace-arrow svg { width: 18px; height: 18px; display:block; }
+  .trace-cap { font-size: 13.5px; color: var(--ink-soft); }
+  .trace-cap strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- outputs ---------- */
+  .outputs { background: var(--green-deep); color: #eaf3ee; }
+  .outputs .eyebrow { color: var(--sage-soft); }
+  .outputs .eyebrow::before { background: var(--sage); }
+  .outputs h2 { color: #fff; }
+  .outputs h2 em { color: var(--sage-soft); }
+  .outputs .sec-head p { color: #b9cec5; }
+  .out-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .out-panel { background: var(--paper); color: var(--ink); border-radius: 20px; padding: 8px; box-shadow: var(--shadow-lg); }
+  .out-window { background: var(--card); border: 1px solid var(--line); border-radius: 15px; overflow: hidden; }
+  .out-bar { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--line); background: var(--paper-warm); }
+  .out-bar .ob-title { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 9px; }
+  .out-bar .ob-title svg { width: 16px; height: 16px; color: var(--green); }
+  .out-bar .ob-pdf { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .out-body { padding: 20px; }
+  .out-caption { padding: 16px 8px 8px; }
+  .out-caption h3 { font-size: 22px; color: var(--ink); }
+  .out-caption p { font-size: 14px; color: var(--ink-soft); margin-top: 6px; }
+  .outputs .out-caption h3 { color: #fff; }
+  .outputs .out-caption p { color: #b9cec5; }
+  .outputs .out-caption { padding: 18px 6px 6px; }
+
+  .macro-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
+  .macro { background: var(--paper-warm); border: 1px solid var(--line); border-radius: 11px; padding: 11px 12px; }
+  .macro .m-n { font-family: "Newsreader", serif; font-size: 21px; font-weight: 600; color: var(--green); line-height: 1; }
+  .macro .m-l { font-size: 10.5px; color: var(--muted); margin-top: 4px; font-family: "IBM Plex Mono", monospace; text-transform: uppercase; letter-spacing: .04em; }
+  .dl-row { display: flex; gap: 12px; }
+  .dl-col { flex: 1; }
+  .dl-col h5 { font-family: "IBM Plex Mono", monospace; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; margin: 0 0 8px; display: flex; align-items: center; gap: 6px; }
+  .dl-col.fav h5 { color: var(--green); }
+  .dl-col.avoid h5 { color: var(--clay-deep); }
+  .dl-col ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+  .dl-col li { font-size: 13px; color: var(--ink-soft); display: flex; gap: 7px; align-items: baseline; }
+  .dl-col li::before { content: ""; width: 5px; height: 5px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .dl-col.fav li::before { background: var(--sage); }
+  .dl-col.avoid li::before { background: var(--clay); }
+
+  .meal { display: flex; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .meal:last-child { border-bottom: none; }
+  .meal-time { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--clay-deep); width: 64px; flex: none; padding-top: 2px; text-transform: uppercase; letter-spacing: .03em; }
+  .meal-main { flex: 1; }
+  .meal-main h6 { font-size: 14.5px; margin: 0 0 2px; font-family: "IBM Plex Sans", sans-serif; font-weight: 600; }
+  .meal-main p { font-size: 12.5px; color: var(--muted); }
+  .meal-kcal { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--ink-soft); flex: none; padding-top: 2px; }
+
+  /* ---------- safety ---------- */
+  .safety-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 56px; align-items: start; }
+  .safety-list { display: grid; gap: 14px; }
+  .srow { display: flex; gap: 16px; padding: 20px 22px; background: var(--card); border: 1px solid var(--line); border-radius: 15px; transition: border-color .25s, box-shadow .25s; }
+  .srow:hover { border-color: var(--sage-soft); box-shadow: var(--shadow-sm); }
+  .srow .si { width: 38px; height: 38px; border-radius: 10px; background: var(--mint); color: var(--green); display: grid; place-items: center; flex: none; }
+  .srow .si svg { width: 20px; height: 20px; }
+  .srow h4 { font-family: "IBM Plex Sans", sans-serif; font-size: 15.5px; font-weight: 600; margin-bottom: 4px; }
+  .srow p { font-size: 14px; color: var(--ink-soft); }
+  .safety-aside { position: sticky; top: 90px; }
+  .disclaimer-card { background: var(--amber-bg); border: 1px solid var(--amber-line); border-radius: 18px; padding: 28px; }
+  .disclaimer-card .dc-ico { width: 44px; height: 44px; border-radius: 12px; background: #fff; color: var(--amber-ink); display: grid; place-items: center; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+  .disclaimer-card .dc-ico svg { width: 24px; height: 24px; }
+  .disclaimer-card h3 { font-size: 22px; color: var(--amber-ink); margin-bottom: 10px; }
+  .disclaimer-card p { font-size: 14px; color: #7d5417; line-height: 1.6; }
+  .disclaimer-card .dc-rule { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--amber-line); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--amber-ink); letter-spacing: .02em; }
+
+  /* ---------- CTA ---------- */
+  .cta { text-align: center; padding: 110px 0; }
+  .cta h2 { font-size: clamp(34px, 4.6vw, 56px); line-height: 1.05; }
+  .cta h2 em { font-style: italic; color: var(--green); }
+  .cta p { font-size: 19px; color: var(--ink-soft); max-width: 46ch; margin: 20px auto 0; }
+  .cta .hero-cta { justify-content: center; margin-top: 36px; }
+
+  /* ---------- footer ---------- */
+  footer { background: var(--green-deep); color: #b9cec5; padding: 56px 0 30px; }
+  .foot-top { display: flex; justify-content: space-between; gap: 40px; flex-wrap: wrap; padding-bottom: 36px; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .foot-brand { max-width: 320px; }
+  .foot-brand .brand { color: #fff; }
+  .foot-brand .brand b { color: var(--sage-soft); }
+  .foot-brand p { font-size: 13.5px; margin-top: 14px; color: #9fb8ad; }
+  .foot-cols { display: flex; gap: 60px; flex-wrap: wrap; }
+  .foot-col h5 { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--sage-soft); margin-bottom: 14px; font-weight: 500; }
+  .foot-col a { display: block; font-size: 14px; color: #c2d6cc; margin-bottom: 9px; transition: color .2s; }
+  .foot-col a:hover { color: #fff; }
+  .foot-bottom { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; padding-top: 24px; font-size: 12.5px; color: #8aa79b; }
+  .foot-bottom .mono { font-size: 11.5px; }
+
+  /* ---------- reveal ---------- */
+  .reveal { transition: opacity .7s cubic-bezier(.16,.84,.44,1), transform .7s cubic-bezier(.16,.84,.44,1); }
+  html.anim .reveal { opacity: 0; transform: translateY(26px); }
+  html.anim .reveal.in { opacity: 1; transform: none; }
+  .reveal.d1 { transition-delay: .08s; } .reveal.d2 { transition-delay: .16s; }
+  .reveal.d3 { transition-delay: .24s; } .reveal.d4 { transition-delay: .32s; }
+
+  @media (prefers-reduced-motion: reduce) { html.anim .reveal { opacity: 1; transform: none; transition: none; } html { scroll-behavior: auto; } }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 1000px) {
+    .hero-grid, .pos-grid, .engine-grid, .out-grid, .safety-grid { grid-template-columns: 1fr; }
+    .hero-card-stack { margin-top: 36px; max-width: 460px; }
+    .flow { grid-template-columns: repeat(2, 1fr); gap: 40px 0; }
+    .flow-step:nth-child(2)::after { display: none; }
+    .profile-grid { grid-template-columns: repeat(2, 1fr); }
+    .safety-aside { position: static; }
+  }
+  @media (max-width: 720px) {
+    .wrap { padding: 0 22px; }
+    .nav-links { display: none; }
+    .nav-toggle { display: grid; }
+    section.block { padding: 68px 0; }
+    .flow { grid-template-columns: 1fr; }
+    .flow-step { padding: 0 0 0 0; }
+    .flow-step::after { display: none !important; }
+    .profile-grid { grid-template-columns: 1fr; }
+    .macro-row, .cc-targets { grid-template-columns: repeat(3,1fr); }
+    .float-why { left: -10px; top: -16px; }
+    .float-rule { right: -6px; }
+    .trace { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- PRINT ---------- */
+  @media print {
+    @page { size: A4 portrait; margin: 14mm 12mm; }
+    html, body { background: #fff !important; }
+    body::before { display: none !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+    /* freeze animations/reveals at their visible end-state */
+    html.anim .reveal, html.anim .reveal.in { opacity: 1 !important; transform: none !important; }
+    *, *::before, *::after {
+      animation-delay: -99s !important; animation-duration: .001s !important;
+      animation-iteration-count: 1 !important; animation-fill-mode: both !important;
+      animation-play-state: running !important; transition-duration: 0s !important;
+    }
+
+    /* drop sticky chrome */
+    header.nav { display: none !important; }
+    .hero { padding-top: 8px !important; }
+
+    /* tame heavy shadows so they don't muddy print */
+    .chart-card, .float-tag, .out-panel, .pcard, .srow, .disclaimer-card,
+    .layer-rules, .flow-num { box-shadow: none !important; }
+    .chart-card, .out-panel { border: 1px solid var(--line-strong) !important; }
+
+    /* page rhythm: keep each major section together, start fresh sections */
+    section.block { padding: 26px 0 !important; break-inside: avoid; }
+    section.pos, section.outputs { break-before: page; }
+    section#engine, section#safety, section.cta { break-before: page; }
+    .sec-head { break-after: avoid; margin-bottom: 26px !important; }
+
+    /* don't split cards/steps/rows across pages */
+    .pcard, .srow, .claim, .flow-step, .out-panel, .chart-card,
+    .layer, .trace, .scope-note, .disclaimer-card, .meal { break-inside: avoid; }
+
+    /* hero card stack: avoid clipped floats running off the page */
+    .float-tag { position: static !important; display: inline-flex; margin: 6px 8px 0 0; }
+    .hero-card-stack { margin-top: 18px !important; }
+
+    /* keep dark sections readable on paper */
+    .pos, .outputs, footer { box-shadow: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+  <div class="wrap nav-inner">
+    <a href="#top" class="brand">
+      <span class="mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 21c4.5-3 7-6.5 7-10.5C19 6.4 16.6 4 13.8 4 12.9 4 12 4.4 12 4.4S11.1 4 10.2 4C7.4 4 5 6.4 5 10.5 5 14.5 7.5 18 12 21Z" fill="#fff"/><path d="M12 21V8" stroke="#0e5945" stroke-width="1.4" stroke-linecap="round"/><path d="M12 12c1.6 0 2.8-1.1 3-2.6" stroke="#0e5945" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </span>
+      Onco<b>Nourish</b>
+    </a>
+    <nav class="nav-links">
+      <a href="#approach">Approach</a>
+      <a href="#how">How it works</a>
+      <a href="#profile">Profile</a>
+      <a href="#engine">Engine</a>
+      <a href="#outputs">Outputs</a>
+      <a href="#safety">Safety</a>
+    </nav>
+    <a href="#cta" class="nav-cta">Request a demo</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-bg"></div>
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow reveal">Clinician-prescribed · AI-guided · Supportive care</span>
+      <h1 class="reveal d1">Nutrition that helps patients <em>tolerate treatment</em>.</h1>
+      <p class="lede reveal d2">OncoNourish turns an oncology patient's clinical profile into a personalised nutrition chart and day-by-day Indian meal plans — built on auditable clinical rules, reviewed and approved by their care team.</p>
+      <div class="hero-cta reveal d3">
+        <a href="#how" class="btn btn-primary">See how it works
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="#outputs" class="btn btn-ghost">View a sample plan</a>
+      </div>
+      <div class="disclaimer-chip reveal d4">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 2.4 17.6A2 2 0 0 0 4.1 20.6h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Supportive care only — not a substitute for medical advice. No treat / cure / arrest claims.
+      </div>
+    </div>
+
+    <div class="hero-card-stack reveal d2">
+      <div class="float-tag float-why">
+        <span class="ft-ico"><svg viewBox="0 0 24 24" fill="none"><path d="M9.5 16.5h5M10 19.5h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2h5c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><div class="ft-t">Every rule shows "why"</div><div class="ft-s">ESPEN · ASCO · ICMR</div></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="cc-head">
+          <div class="cc-patient">
+            <div class="cc-avatar">AK</div>
+            <div>
+              <div class="cc-name">Anita K.</div>
+              <div class="cc-sub">Breast · Stage II · AC-T</div>
+            </div>
+          </div>
+          <span class="badge-approved">Approved</span>
+        </div>
+        <div class="cc-targets">
+          <div class="target"><div class="t-num">1.4<small> g/kg</small></div><div class="t-label">Protein</div></div>
+          <div class="target"><div class="t-num">1650<small> kcal</small></div><div class="t-label">Energy</div></div>
+          <div class="target"><div class="t-num">2.2<small> L</small></div><div class="t-label">Fluids</div></div>
+        </div>
+        <div class="cc-section-label"><span class="dot" style="background:var(--sage)"></span>Foods to favour</div>
+        <div class="chips">
+          <span class="chip fav">Moong dal</span><span class="chip fav">Paneer</span><span class="chip fav">Curd (lactose-low)</span><span class="chip fav">Ragi</span><span class="chip fav">Banana</span>
+        </div>
+        <div class="cc-section-label"><span class="dot" style="background:var(--clay)"></span>Foods to limit</div>
+        <div class="chips">
+          <span class="chip avoid">Raw salads</span><span class="chip avoid">Street food</span><span class="chip avoid">Grapefruit</span>
+        </div>
+      </div>
+
+      <div class="float-tag float-rule">
+        <span class="ft-ico"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4 6v5c0 4.5 3.2 7.8 8 10 4.8-2.2 8-5.5 8-10V6l-8-3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><div class="ft-t">Clinician-approved</div><div class="ft-s">gate before patient</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRUST STRIP -->
+  <div class="trust">
+    <div class="wrap trust-inner">
+      <span class="trust-label">Grounded in established guidance</span>
+      <div class="trust-items">
+        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none"><path d="m9 12 2 2 4-4M12 3 4 6v5c0 4.5 3.2 7.8 8 10 4.8-2.2 8-5.5 8-10V6l-8-3Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>ESPEN oncology</span>
+        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none"><path d="m9 12 2 2 4-4M12 3 4 6v5c0 4.5 3.2 7.8 8 10 4.8-2.2 8-5.5 8-10V6l-8-3Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>ASCO supportive care</span>
+        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none"><path d="m9 12 2 2 4-4M12 3 4 6v5c0 4.5 3.2 7.8 8 10 4.8-2.2 8-5.5 8-10V6l-8-3Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>ICMR dietary norms</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POSITIONING -->
+<section class="block pos" id="approach">
+  <div class="wrap pos-grid">
+    <div>
+      <span class="eyebrow reveal">The positioning</span>
+      <p class="pos-quote reveal d1" style="margin-top:18px;">OncoNourish keeps patients <span class="hl">nourished and strong enough</span> to get through their treatment — it does not treat, cure, or arrest the disease.</p>
+    </div>
+    <div class="pos-claims">
+      <div class="claim yes reveal d1">
+        <span class="ci"><svg viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4 10-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><h4>What it does</h4><p>Maintains nutritional status, manages treatment side-effects through diet, and supports protein & calorie targets during therapy.</p></div>
+      </div>
+      <div class="claim yes reveal d2">
+        <span class="ci"><svg viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4 10-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><h4>Who stays in control</h4><p>The oncologist or dietitian reviews and approves every plan. The patient receives a read-only, care-team-sanctioned chart.</p></div>
+      </div>
+      <div class="claim no reveal d3">
+        <span class="ci"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+        <div><h4>What it will never claim</h4><p>No statement that food treats, cures, shrinks, or arrests cancer. Supportive-care framing appears on every screen and every export.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="block" id="how">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">The flow</span>
+      <h2>From clinical profile to <em>an approved plan</em> the patient can follow.</h2>
+      <p>The clinician drives the whole flow. The patient view is a shared, read-only page — no medical decision is ever made without the care team.</p>
+    </div>
+    <div class="flow">
+      <div class="flow-step reveal d1">
+        <div class="flow-num"><span>01</span><svg viewBox="0 0 24 24" fill="none"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v6M22 11h-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="flow-actor">Clinician</div>
+        <h3>Create & intake</h3>
+        <p>Add a patient and fill the structured intake — cancer type & stage, regimen, comorbidities, diet pattern and intolerances.</p>
+      </div>
+      <div class="flow-step reveal d2">
+        <div class="flow-num"><span>02</span><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v3M12 18v3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M3 12h3M18 12h3M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+        <div class="flow-actor">Engine</div>
+        <h3>Generate</h3>
+        <p>The rules engine sets targets and favour / avoid lists; the LLM turns them into clear, affordable, regional meal plans.</p>
+      </div>
+      <div class="flow-step reveal d3">
+        <div class="flow-num"><span>03</span><svg viewBox="0 0 24 24" fill="none"><path d="M11 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6M20.4 4.6a1.8 1.8 0 0 0-2.6 0L9 13.4 8 17l3.6-1L20.4 7.2a1.8 1.8 0 0 0 0-2.6Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="flow-actor">Clinician</div>
+        <h3>Review & approve</h3>
+        <p>Inspect every recommendation with its source rule, edit if needed, then approve. Nothing reaches the patient unapproved.</p>
+        <span class="flow-gate"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4 6v5c0 4.5 3.2 7.8 8 10 4.8-2.2 8-5.5 8-10V6l-8-3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Approval gate</span>
+      </div>
+      <div class="flow-step reveal d4">
+        <div class="flow-num"><span>04</span><svg viewBox="0 0 24 24" fill="none"><path d="M3 9h18M3 9l1.5-4.5A1.5 1.5 0 0 1 5.9 3.5h12.2a1.5 1.5 0 0 1 1.4 1L21 9M5 9v10a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="flow-actor">Patient</div>
+        <h3>Follow & print</h3>
+        <p>The patient opens their approved chart and daily meals — or takes home a clean, printable PDF the clinician hands over.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROFILE -->
+<section class="block profile" id="profile">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Personalisation profile</span>
+      <h2>Six inputs that <em>drive every recommendation</em>.</h2>
+      <p>The intake form is the single source of truth. Each field maps to specific rules — change a field, and the plan changes with it.</p>
+    </div>
+    <div class="profile-grid">
+      <div class="pcard reveal d1">
+        <div class="pico"><svg viewBox="0 0 24 24" fill="none"><path d="M9 11V7a3 3 0 0 1 6 0v4M5 11h14l-1 9H6l-1-9Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h4>Disease & stage</h4>
+        <p>Cancer type, stage and disease condition set the clinical baseline for the whole chart.</p>
+        <div class="ptags"><span class="ptag">type</span><span class="ptag">stage</span><span class="ptag">condition</span></div>
+      </div>
+      <div class="pcard reveal d2">
+        <div class="pico"><svg viewBox="0 0 24 24" fill="none"><path d="M10.5 3.5 8 6m6.5 11 2.5-2.5M7 9l8 8m-9-1 6-6a3.5 3.5 0 0 1 5 5l-6 6a3.5 3.5 0 0 1-5-5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h4>Treatment & meds</h4>
+        <p>Regimen, line of therapy and current / concomitant medications drive drug-nutrient cautions.</p>
+        <div class="ptags"><span class="ptag">regimen</span><span class="ptag">line</span><span class="ptag">meds</span></div>
+      </div>
+      <div class="pcard reveal d3">
+        <div class="pico"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2 5 4-12 2 7h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h4>Comorbidities</h4>
+        <p>Diabetes, renal, cardiac or hepatic conditions adjust targets and constrain food lists.</p>
+        <div class="ptags"><span class="ptag">diabetes</span><span class="ptag">renal</span><span class="ptag">cardiac</span></div>
+      </div>
+      <div class="pcard reveal d1">
+        <div class="pico"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 8v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h4>Anthropometrics</h4>
+        <p>Age, sex, height and weight compute BMI and personalise protein & calorie targets.</p>
+        <div class="ptags"><span class="ptag">age/sex</span><span class="ptag">BMI</span><span class="ptag">targets</span></div>
+      </div>
+      <div class="pcard reveal d2">
+        <div class="pico"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19h16M7 19V9m5 10V5m5 14v-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h4>Diet pattern</h4>
+        <p>Veg / non-veg and regional cuisine keep meals familiar, affordable and culturally relevant.</p>
+        <div class="ptags"><span class="ptag">veg / non-veg</span><span class="ptag">region</span></div>
+      </div>
+      <div class="pcard reveal d3">
+        <div class="pico"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18ZM5.6 5.6l12.8 12.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+        <h4>Intolerances</h4>
+        <p>Lactose, gluten and a standard checklist filter the food and recipe library automatically.</p>
+        <div class="ptags"><span class="ptag">lactose</span><span class="ptag">gluten</span><span class="ptag">+ checklist</span></div>
+      </div>
+    </div>
+    <div class="scope-note reveal">
+      <span class="sn-label">Phase-1 scope</span>
+      <span class="sn-body">Focused on a small set of high-volume cancers — <strong>breast, colorectal, head &amp; neck, and upper-GI</strong> — with a data model designed so phase-aware regeneration can be added later.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ENGINE -->
+<section class="block" id="engine">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Engine architecture</span>
+      <h2>Auditable rules first. <em>The LLM only localises.</em></h2>
+      <p>Clinical decisions live in editable, evidence-based rules. The language model presents and translates them into plain, regional meal plans — it never invents clinical claims or overrides a rule.</p>
+    </div>
+    <div class="engine-grid">
+      <div class="layer layer-rules reveal d1">
+        <span class="layer-tag">Layer 1 · Rules engine</span>
+        <h3>Evidence, encoded</h3>
+        <p>ESPEN / ASCO / ICMR guidance stored as explicit, auditable config — favour &amp; avoid lists, protein &amp; calorie targets, hydration, supplement flags and drug-nutrient cautions, keyed off the profile. Editable by a clinical advisor, not hardcoded.</p>
+        <div class="rule-snippet"><span class="c"># protein_target.rule.yaml</span><br/><span class="k">when</span>: cancer_stage <span class="k">in</span> [<span class="s">"II"</span>,<span class="s">"III"</span>]<br/><span class="k">and</span>: comorbidity != <span class="s">"renal"</span><br/><span class="k">set</span>:<br/>&nbsp;&nbsp;protein_g_per_kg: <span class="s">1.4</span><br/>&nbsp;&nbsp;source: <span class="s">"ESPEN 2021 §4.2"</span><br/>&nbsp;&nbsp;why: <span class="s">"preserve lean mass in therapy"</span></div>
+      </div>
+      <div class="layer layer-llm reveal d2">
+        <span class="layer-tag">Layer 2 · LLM presenter</span>
+        <h3>Plain, local, affordable</h3>
+        <p>Takes the rules-engine output as structured context and turns it into clear, culturally relevant Indian meal plans in plain language — abstracted behind a single service module with one prompt template.</p>
+        <ul class="llm-list">
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4 10-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Localises to region, cuisine and budget</li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4 10-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Respects every intolerance &amp; avoid rule</li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4 10-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Never adds a clinical claim of its own</li>
+        </ul>
+      </div>
+    </div>
+    <div class="trace reveal">
+      <div class="trace-flow">
+        <span class="trace-node">Profile</span>
+        <span class="trace-arrow"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="trace-node hl">Rule</span>
+        <span class="trace-arrow"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="trace-node">Recommendation</span>
+        <span class="trace-arrow"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="trace-node">Meal plan</span>
+      </div>
+      <div class="trace-cap"><strong>Full traceability.</strong> Every recommendation links back to the rule that produced it, so the clinician can always see <em>why</em> — and audit or edit the source.</div>
+    </div>
+  </div>
+</section>
+
+<!-- OUTPUTS -->
+<section class="block outputs" id="outputs">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="eyebrow" style="justify-content:center;">Two outputs, one handover</span>
+      <h2>A nutrition chart <em>and</em> daily meal plans.</h2>
+      <p>Generated together, reviewed together, and exported to a single clean, printable PDF the clinician hands to the patient.</p>
+    </div>
+    <div class="out-grid">
+      <div class="reveal d1">
+        <div class="out-panel">
+          <div class="out-window">
+            <div class="out-bar">
+              <span class="ob-title"><svg viewBox="0 0 24 24" fill="none"><path d="M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2M8 3v3h8V3M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Nutrition Chart</span>
+              <span class="ob-pdf"><svg viewBox="0 0 24 24" fill="none" width="12" height="12"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>PDF</span>
+            </div>
+            <div class="out-body">
+              <div class="macro-row">
+                <div class="macro"><div class="m-n">1.4 g/kg</div><div class="m-l">Protein</div></div>
+                <div class="macro"><div class="m-n">1650</div><div class="m-l">kcal / day</div></div>
+                <div class="macro"><div class="m-n">2.2 L</div><div class="m-l">Hydration</div></div>
+              </div>
+              <div class="dl-row">
+                <div class="dl-col fav">
+                  <h5><svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="m5 12 4 4 10-10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Favour</h5>
+                  <ul><li>High-protein dals &amp; paneer</li><li>Soft-cooked vegetables</li><li>Ragi, banana, curd</li><li>Small frequent meals</li></ul>
+                </div>
+                <div class="dl-col avoid">
+                  <h5><svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>Avoid</h5>
+                  <ul><li>Raw / street food</li><li>Grapefruit (drug interaction)</li><li>Very spicy or acidic food</li><li>Unpasteurised dairy</li></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="out-caption">
+          <h3>Nutrition Chart</h3>
+          <p>The framework: favour / avoid lists, macro &amp; protein targets, hydration, supplement guidance and do's &amp; don'ts — mapped to regimen and comorbidities.</p>
+        </div>
+      </div>
+
+      <div class="reveal d2">
+        <div class="out-panel">
+          <div class="out-window">
+            <div class="out-bar">
+              <span class="ob-title"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16M4 12h16M4 19h10M7 5v14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Daily Meal Plan · Day 1</span>
+              <span class="ob-pdf">Veg · South Indian</span>
+            </div>
+            <div class="out-body">
+              <div class="meal"><div class="meal-time">7:30 AM</div><div class="meal-main"><h6>Ragi idli + moong sambar</h6><p>Soft, easy to swallow · high protein</p></div><div class="meal-kcal">320 kcal</div></div>
+              <div class="meal"><div class="meal-time">10:30 AM</div><div class="meal-main"><h6>Banana + soaked almonds</h6><p>Energy-dense snack between meals</p></div><div class="meal-kcal">180 kcal</div></div>
+              <div class="meal"><div class="meal-time">1:00 PM</div><div class="meal-main"><h6>Curd rice + paneer bhurji</h6><p>Lactose-low curd · protein-forward</p></div><div class="meal-kcal">450 kcal</div></div>
+              <div class="meal"><div class="meal-time">4:30 PM</div><div class="meal-main"><h6>Moong dal chilla</h6><p>Light, protein-rich evening meal</p></div><div class="meal-kcal">240 kcal</div></div>
+              <div class="meal"><div class="meal-time">8:00 PM</div><div class="meal-main"><h6>Khichdi + steamed veg</h6><p>Gentle on the gut · well tolerated</p></div><div class="meal-kcal">380 kcal</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="out-caption">
+          <h3>Daily Meal Plans</h3>
+          <p>Concrete day-by-day meals, portions and simple recipes — built around local food and the patient's exact intolerances.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SAFETY -->
+<section class="block profile" id="safety">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Safety &amp; compliance</span>
+      <h2>Built as <em>supportive care</em>, with guardrails that don't bend.</h2>
+      <p>Health data is handled carefully and every plan passes through the care team. These are hard requirements, not options.</p>
+    </div>
+    <div class="safety-grid">
+      <div class="safety-list">
+        <div class="srow reveal d1">
+          <span class="si"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4 6v5c0 4.5 3.2 7.8 8 10 4.8-2.2 8-5.5 8-10V6l-8-3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <div><h4>Clinician approval gate</h4><p>No plan reaches a patient until the oncologist or dietitian has reviewed and approved it.</p></div>
+        </div>
+        <div class="srow reveal d2">
+          <span class="si"><svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 2.4 17.6A2 2 0 0 0 4.1 20.6h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <div><h4>Supportive-care framing</h4><p>A visible disclaimer on every screen and export — never a claim to treat, cure, or arrest disease.</p></div>
+        </div>
+        <div class="srow reveal d3">
+          <span class="si"><svg viewBox="0 0 24 24" fill="none"><path d="M12 22s7-4 7-10V5l-7-3-7 3v7c0 6 7 10 7 10ZM9 12h6M12 9v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <div><h4>Minimal, consented data</h4><p>No unnecessary PII, a clear consent notice, and basic access control separating clinician and patient views.</p></div>
+        </div>
+        <div class="srow reveal d4">
+          <span class="si"><svg viewBox="0 0 24 24" fill="none"><path d="M9.5 16.5h5M10 19.5h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2h5c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <div><h4>Drug-nutrient cautions</h4><p>Medication-aware flags surface foods to avoid for known interactions — each traced to its source rule.</p></div>
+        </div>
+      </div>
+      <aside class="safety-aside reveal d2">
+        <div class="disclaimer-card">
+          <div class="dc-ico"><svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 2.4 17.6A2 2 0 0 0 4.1 20.6h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3>The standing disclaimer</h3>
+          <p>OncoNourish provides supportive nutritional guidance only. It is not a substitute for professional medical advice, diagnosis, or treatment. It does not treat, cure, or arrest cancer. Always follow your care team's instructions.</p>
+          <div class="dc-rule">// rendered on every screen &amp; every PDF</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="block cta" id="cta">
+  <div class="wrap">
+    <span class="eyebrow reveal" style="justify-content:center;">Ready when you are</span>
+    <h2 class="reveal d1">Keep patients nourished<br/>through every cycle.</h2>
+    <p class="reveal d2">See OncoNourish run end-to-end on real sample cases — clinician intake, generate, review, approve and PDF handover.</p>
+    <div class="hero-cta reveal d3">
+      <a href="#top" class="btn btn-primary">Request a demo
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="#outputs" class="btn btn-ghost">Explore the outputs</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <a href="#top" class="brand">
+          <span class="mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21c4.5-3 7-6.5 7-10.5C19 6.4 16.6 4 13.8 4 12.9 4 12 4.4 12 4.4S11.1 4 10.2 4C7.4 4 5 6.4 5 10.5 5 14.5 7.5 18 12 21Z" fill="#fff"/><path d="M12 21V8" stroke="#0e5945" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+          Onco<b>Nourish</b>
+        </a>
+        <p>An AI-guided, clinician-prescribed nutrition companion for oncology patients. Supportive care — keeping patients nourished and strong enough to tolerate treatment.</p>
+      </div>
+      <div class="foot-cols">
+        <div class="foot-col">
+          <h5>Product</h5>
+          <a href="#approach">Approach</a>
+          <a href="#how">How it works</a>
+          <a href="#profile">Profile</a>
+          <a href="#outputs">Outputs</a>
+        </div>
+        <div class="foot-col">
+          <h5>Evidence base</h5>
+          <a href="#engine">Rules engine</a>
+          <a href="#engine">Traceability</a>
+          <a href="#safety">Safety &amp; compliance</a>
+        </div>
+        <div class="foot-col">
+          <h5>For teams</h5>
+          <a href="#cta">Request a demo</a>
+          <a href="#safety">Disclaimer</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span class="mono">© 2026 OncoNourish · Supportive care only · Not a substitute for medical advice</span>
+      <span class="mono">ESPEN · ASCO · ICMR aligned</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // nav shadow on scroll
+  const nav = document.getElementById('nav');
+  const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 8);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // reveal on scroll
+  document.documentElement.classList.add('anim');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ensure above-the-fold content reveals immediately (and as a no-IO fallback)
+  const revealInView = () => {
+    document.querySelectorAll('.reveal:not(.in)').forEach(el => {
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.95) el.classList.add('in');
+    });
+  };
+  window.addEventListener('load', revealInView);
+  revealInView();
+
+  // ---- auto-print once fonts + layout are ready ----
+  (function () {
+    let printed = false;
+    const go = () => {
+      if (printed) return; printed = true;
+      // reveal everything so nothing is hidden on paper
+      document.documentElement.classList.add('anim');
+      document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+      setTimeout(() => window.print(), 500);
+    };
+    const ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+    if (document.readyState === 'complete') {
+      ready.then(go);
+    } else {
+      window.addEventListener('load', () => ready.then(go));
+    }
+  })();
+</script>
+</body>
+</html>
