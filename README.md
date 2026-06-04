@@ -11,10 +11,10 @@ the care team before reaching the patient.
 > advice and makes **no claim** to treat, cure, or arrest cancer.
 
 ## Live demo
-- **Overview / client page:** [`index.html`](./index.html)
-- **Interactive tool:** [`tool.html`](./tool.html) — 9-step patient intake → clinician review → nutrition chart + meal plan
+**▶ https://abhi020483.github.io/onconourish/** — share this link with the client.
 
-*(Once GitHub Pages is enabled, the public link is added at the top of this section.)*
+- **Overview / client page:** https://abhi020483.github.io/onconourish/
+- **Interactive tool:** https://abhi020483.github.io/onconourish/tool.html — 9-step patient intake → clinician review → nutrition chart + meal plan
 
 ## What's inside
 | Path | What it is |
