@@ -8,8 +8,14 @@ ONCO.options = {
     { id: "low", label: "Low–moderate", factor: 27 },
     { id: "ambulatory", label: "Ambulatory / regaining", factor: 30 }
   ],
-  cancerTypes: ["Breast", "Colorectal", "Head & neck", "Upper-GI"],
+  cancerTypes: ["Breast", "Colorectal", "Head & neck", "Upper-GI", "Gastric"],
   stages: ["I", "II", "III", "IV", "Not sure"],
+  gastricPhases: [
+    { id: "preop", label: "Pre-op (resectable)" },
+    { id: "postop", label: "Post-gastrectomy" },
+    { id: "systemic", label: "Systemic therapy" },
+    { id: "advanced", label: "Advanced / palliative" }
+  ],
   treatments: ["Chemotherapy", "Radiation", "Surgery", "Targeted therapy", "None yet"],
   comorbidities: [
     { id: "diabetes", label: "Diabetes" },
@@ -37,7 +43,9 @@ ONCO.options = {
     { id: "constipation", label: "Constipation" },
     { id: "appetite", label: "Poor appetite" },
     { id: "fatigue", label: "Fatigue" },
-    { id: "dysphagia", label: "Swallowing difficulty" }
+    { id: "dysphagia", label: "Swallowing difficulty" },
+    { id: "early_satiety", label: "Early satiety / fullness" },
+    { id: "dumping", label: "Dumping syndrome" }
   ]
 };
 
@@ -51,7 +59,9 @@ ONCO.symptomStrategy = {
   constipation: "Higher fibre, more fluids, prunes / papaya",
   appetite: "Energy-dense meals fortified with ghee, oil, milk powder or nuts",
   fatigue: "Easy-to-prepare, ready-to-eat energy-dense options",
-  dysphagia: "Soft, moist, easy-to-swallow textures; purées and thick liquids"
+  dysphagia: "Soft, moist, easy-to-swallow textures; purées and thick liquids",
+  early_satiety: "Small, frequent, energy- and protein-dense low-bulk meals; ONS between meals; limit fluids with meals",
+  dumping: "Small frequent meals; avoid sugary drinks/sweets; pair carbs with protein & fat; separate fluids from solids (~30 min apart); low-lactose if needed"
 };
 
 /* Rules config (spec 3.2) — editable by a clinical advisor */
@@ -87,8 +97,8 @@ ONCO.dishes = [
   { id:"banana_almond", name:"Banana + soaked almonds", slot:"snack", kcal:180, protein:6, diet:0, region:["South Indian","North Indian","East Indian","West Indian"], contains:["nuts"], desc:"Energy-dense snack between meals", potassium:true },
   { id:"sprouts_chaat", name:"Steamed sprouts chaat", slot:"snack", kcal:160, protein:10, diet:0, region:["West Indian","North Indian"], contains:[], highProtein:true, fibre:true, lowGI:true, desc:"Protein + fibre, lightly spiced" },
   { id:"curd_rice_small", name:"Small curd rice", slot:"snack", kcal:200, protein:7, diet:1, region:["South Indian"], contains:["lactose"], soft:true, bland:true, subKey:"curd", desc:"Cooling, soothing · easy to tolerate" },
-  { id:"peanut_chikki", name:"Peanut & jaggery chikki", slot:"snack", kcal:210, protein:7, diet:0, region:["West Indian","North Indian"], contains:["nuts"], desc:"Energy-dense bite, fortifies calories" },
-  { id:"date_milkshake", name:"Date & nut milkshake", slot:"snack", kcal:240, protein:9, diet:1, region:["North Indian"], contains:["lactose","nuts"], soft:true, subKey:"milk", desc:"Smooth, energy-dense · easy to sip" },
+  { id:"peanut_chikki", name:"Peanut & jaggery chikki", slot:"snack", kcal:210, protein:7, diet:0, region:["West Indian","North Indian"], contains:["nuts"], sweet:true, desc:"Energy-dense bite, fortifies calories" },
+  { id:"date_milkshake", name:"Date & nut milkshake", slot:"snack", kcal:240, protein:9, diet:1, region:["North Indian"], contains:["lactose","nuts"], soft:true, sweet:true, subKey:"milk", desc:"Smooth, energy-dense · easy to sip" },
   { id:"coconut_water", name:"Tender coconut water + biscuit", slot:"snack", kcal:140, protein:3, diet:0, region:["South Indian"], contains:["gluten"], bland:true, lowOdour:true, potassium:true, desc:"Hydrating, gentle for nausea" },
   { id:"moong_soup", name:"Moong dal soup", slot:"snack", kcal:170, protein:11, diet:0, region:["South Indian","North Indian","East Indian","West Indian"], contains:[], soft:true, bland:true, lowOdour:true, highProtein:true, desc:"Warm, soft, protein-rich sip" },
   { id:"banana_smoothie", name:"Banana & curd smoothie", slot:"snack", kcal:220, protein:9, diet:1, region:["South Indian","North Indian","East Indian","West Indian"], contains:["lactose"], soft:true, bland:true, subKey:"curd", desc:"Smooth, easy to sip · soothing" },
@@ -109,7 +119,15 @@ ONCO.dishes = [
   { id:"idiyappam_stew", name:"Idiyappam + veg stew", slot:"dinner", kcal:360, protein:11, diet:1, region:["South Indian"], contains:["lactose"], soft:true, bland:true, lowOdour:true, subKey:"milk", desc:"Soft rice noodles in mild stew" },
   { id:"paneer_veg_dinner", name:"Paneer & vegetable curry + roti", slot:"dinner", kcal:430, protein:21, diet:1, region:["North Indian"], contains:["gluten","lactose"], highProtein:true, subKey:"paneer", gf_alt:"Paneer curry + jowar roti", desc:"Protein-rich vegetarian dinner" },
   { id:"egg_curry_rice", name:"Egg curry + soft rice", slot:"dinner", kcal:420, protein:19, diet:2, region:["East Indian","South Indian"], contains:["egg"], highProtein:true, soft:true, desc:"Comforting · high biological-value protein" },
-  { id:"daliya", name:"Veg daliya (broken wheat)", slot:"dinner", kcal:330, protein:11, diet:1, region:["North Indian"], contains:["gluten","lactose"], soft:true, bland:true, fibre:true, gf_alt:"Veg millet porridge", desc:"Warm, fibre-rich and filling" }
+  { id:"daliya", name:"Veg daliya (broken wheat)", slot:"dinner", kcal:330, protein:11, diet:1, region:["North Indian"], contains:["gluten","lactose"], soft:true, bland:true, fibre:true, gf_alt:"Veg millet porridge", desc:"Warm, fibre-rich and filling" },
+
+  // gastric-friendly: soft, small-volume, low simple sugar, all regions (for gastric cancer / post-gastrectomy)
+  { id:"gc_dalrice_soup", name:"Soft rice + mashed moong dal (soup-style)", slot:"lunch", kcal:380, protein:16, diet:0, region:["South Indian","North Indian","East Indian","West Indian"], contains:[], soft:true, bland:true, lowOdour:true, lowFibre:true, lowGI:true, highProtein:true, gastric:true, desc:"Soft, low-bulk, protein-rich · gentle after gastrectomy" },
+  { id:"gc_paneer_soft", name:"Very soft paneer bhurji + soaked phulka", slot:"dinner", kcal:330, protein:18, diet:1, region:["South Indian","North Indian","East Indian","West Indian"], contains:["lactose","gluten"], soft:true, lowFibre:true, highProtein:true, gastric:true, subKey:"paneer", gf_alt:"Soft paneer bhurji + soaked jowar roti", desc:"Small, soft, protein-dense serving" },
+  { id:"gc_idli_sambar", name:"Idli + extra-lentil sambar (mild)", slot:"breakfast", kcal:300, protein:13, diet:0, region:["South Indian","North Indian","East Indian","West Indian"], contains:[], soft:true, bland:true, lowFibre:true, highProtein:true, gastric:true, desc:"Soft, mild, lentil-forward · low simple sugar" },
+  { id:"gc_suji_kheer", name:"Low-sugar suji kheer with ghee", slot:"snack", kcal:220, protein:7, diet:1, region:["South Indian","North Indian","East Indian","West Indian"], contains:["lactose","gluten"], soft:true, bland:true, lowGI:true, gastric:true, subKey:"milk", gf_alt:"Low-sugar ragi kheer with ghee", desc:"Energy-dense, lightly sweet · split into small sips" },
+  { id:"gc_curd_rice_mild", name:"Soft curd rice, small & mild", slot:"dinner", kcal:300, protein:12, diet:1, region:["South Indian","North Indian","East Indian","West Indian"], contains:["lactose"], soft:true, bland:true, lowFibre:true, gastric:true, subKey:"curd", desc:"Cooling, low-bulk · low-lactose curd if needed" },
+  { id:"gc_dal_chicken_soup", name:"Soft rice + moong dal with shredded chicken", slot:"lunch", kcal:430, protein:26, diet:3, region:["South Indian","North Indian","East Indian","West Indian"], contains:[], soft:true, bland:true, lowFibre:true, highProtein:true, gastric:true, desc:"Soup-style, soft, high protein · well tolerated" }
 ];
 
 /* fortification add-ons to close energy / protein gaps (diet + intolerance aware) */

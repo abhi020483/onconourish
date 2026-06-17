@@ -5,6 +5,17 @@ window.ONCO = window.ONCO || {};
   const round = (n, step) => Math.round(n / step) * step;
   const has = (arr, v) => Array.isArray(arr) && arr.includes(v);
 
+  // Gastric cancer auto-adds side-effect awareness (early satiety always; dumping post-op)
+  // even when the patient hasn't ticked them, so meals stay soft, low-bulk and low-sugar.
+  function effectiveSymptoms(p) {
+    const s = new Set(p.symptomList || []);
+    if (p.cancerType === "Gastric") {
+      if (p.gastricPhase !== "advanced") s.add("early_satiety");
+      if (p.gastricPhase === "postop") s.add("dumping");
+    }
+    return s;
+  }
+
   /* ---------- 2. Calculation Tool ---------- */
   ONCO.calc = function (p) {
     const weight = +p.currentWeight, height = +p.height, age = +p.age || 0;
@@ -107,6 +118,8 @@ window.ONCO = window.ONCO || {};
     // symptom hard filters
     if ((symptoms.has("mucositis") || symptoms.has("dysphagia")) && !d.soft) return null;
     if (symptoms.has("diarrhoea") && d.fibre && !d.lowFibre) return null;
+    if (symptoms.has("dumping") && d.sweet) return null;          // dumping: drop sugary items
+    if (symptoms.has("dumping") && d.fibre && !d.lowFibre) return null;
     return { id: d.id, name, sub, kcal, protein, desc: d.desc, tags: dishTags(d, diabetes) };
   }
 
@@ -121,7 +134,7 @@ window.ONCO = window.ONCO || {};
   }
 
   // score a dish for the patient's symptoms (higher = better fit)
-  function scoreDish(d, symptoms, diabetes, atRisk) {
+  function scoreDish(d, symptoms, diabetes, atRisk, gastric) {
     let s = 0;
     if (atRisk && d.highProtein) s += 3;
     if (symptoms.has("nausea") && (d.bland || d.lowOdour)) s += 3;
@@ -129,6 +142,10 @@ window.ONCO = window.ONCO || {};
     if (symptoms.has("constipation") && d.fibre) s += 2;
     if (symptoms.has("diarrhoea") && d.lowFibre) s += 2;
     if (diabetes && d.lowGI) s += 2;
+    // gastric cancer: prefer soft, low-bulk, protein-dense, low simple sugar
+    if (gastric && d.gastric) s += 4;
+    if (symptoms.has("early_satiety") && d.highProtein && (d.soft || d.lowFibre)) s += 3;
+    if (symptoms.has("dumping") && (d.lowGI || d.lowFibre)) s += 2;
     return s;
   }
 
@@ -147,7 +164,9 @@ window.ONCO = window.ONCO || {};
     }
     if (!adapted.length) return null;
     // score, then rotate by day for variety, avoid repeats
-    adapted.sort((x, y) => scoreDish(y.d, symptoms, diabetes, calc.nutritional_risk === "AT_RISK") - scoreDish(x.d, symptoms, diabetes, calc.nutritional_risk === "AT_RISK") || y.a.protein - x.a.protein);
+    const gastric = p.cancerType === "Gastric";
+    const at = calc.nutritional_risk === "AT_RISK";
+    adapted.sort((x, y) => scoreDish(y.d, symptoms, diabetes, at, gastric) - scoreDish(x.d, symptoms, diabetes, at, gastric) || y.a.protein - x.a.protein);
     const fresh = adapted.filter(x => !used.has(x.a.id));
     const list = fresh.length ? fresh : adapted;
     return list[dayIndex % list.length].a;
@@ -155,9 +174,10 @@ window.ONCO = window.ONCO || {};
 
   ONCO.generateDay = function (p, calc, dayIndex) {
     const ex = excludedSet(p);
-    const symptoms = new Set(p.symptomList || []);
+    const symptoms = effectiveSymptoms(p);
     const used = new Set();
-    const smallFreq = p.mealsPerDay === "Small & frequent" || p.appetite === "poor";
+    const gastricFreq = p.cancerType === "Gastric" && p.gastricPhase !== "advanced";
+    const smallFreq = p.mealsPerDay === "Small & frequent" || p.appetite === "poor" || gastricFreq;
     const slots = smallFreq
       ? [["7:30 AM", "breakfast"], ["10:30 AM", "snack"], ["1:00 PM", "lunch"], ["4:30 PM", "snack"], ["8:00 PM", "dinner"]]
       : [["8:00 AM", "breakfast"], ["1:00 PM", "lunch"], ["5:00 PM", "snack"], ["8:30 PM", "dinner"]];
@@ -206,8 +226,9 @@ window.ONCO = window.ONCO || {};
 
   ONCO.suggest = function (p, calc) {
     const ex = excludedSet(p);
-    const symptoms = new Set(p.symptomList || []);
+    const symptoms = effectiveSymptoms(p);
     const atRisk = calc.nutritional_risk === "AT_RISK";
+    const gastric = p.cancerType === "Gastric";
     const appliedRules = [];
 
     // favour
@@ -229,9 +250,17 @@ window.ONCO = window.ONCO || {};
     if (p.gluten) { appliedRules.push({ id: "gluten_intolerant", note: "Wheat excluded; millet substitutes used" }); avoid.push({ name: "Wheat roti, suji, maida", why: "Gluten — use jowar / bajra / rice" }); }
     if (has(p.comorbidities, "renal")) { appliedRules.push({ id: "renal_cap", note: "Restrict potassium & phosphorus" }); avoid.push({ name: "Banana, citrus, coconut water, nuts", why: "Renal — limit potassium / phosphorus" }); }
     if (has(p.comorbidities, "cardiac")) { appliedRules.push({ id: "cardiac_sodium", note: "Reduce sodium; cap fluid per clinician" }); avoid.push({ name: "Pickles, papad, fried & processed", why: "Cardiac — reduce sodium" }); }
+    if (gastric) {
+      const phase = p.gastricPhase || "preop";
+      appliedRules.push({ id: "gastric_" + phase, note: "Gastric (" + phase + ") — small, soft, protein-dense, low simple-sugar meals" });
+      favour.unshift({ name: "Small, soft, protein-dense meals", why: "Gastric — eases early satiety; protects muscle" });
+      favour.unshift({ name: "ONS / high-protein sips between meals", why: "Meet targets despite low volume" });
+      avoid.push({ name: "Sugary drinks, fruit juices, large sweets", why: "Gastric — reduces dumping (esp. post-gastrectomy)" });
+      avoid.push({ name: "Large, high-bulk or very fatty meals", why: "Worsen early satiety / dumping" });
+    }
 
-    // symptom strategies
-    const strategies = (p.symptomList || []).map(id => ({
+    // symptom strategies (effective set — includes gastric early-satiety / dumping)
+    const strategies = [...symptoms].map(id => ({
       id, label: (ONCO.options.symptoms.find(s => s.id === id) || {}).label || id,
       text: ONCO.symptomStrategy[id]
     })).filter(s => s.text);
@@ -241,6 +270,7 @@ window.ONCO = window.ONCO || {};
     const hydration = `Aim for ~${(calc.targets.fluid_ml_per_day / 1000).toFixed(1)} L of fluids daily${calc.fluidBoost ? " (increased for GI losses)" : ""}${calc.fluidCap ? " — within the clinician's fluid limit" : ""}. Prefer water, soups, buttermilk, coconut water (unless restricted).`;
     const supplements = [];
     if (atRisk) supplements.push("Consider oral nutrition supplement (ONS) between meals — clinician to specify");
+    if (gastric && p.gastricPhase === "postop") supplements.unshift("Monitor & supplement vitamin B₁₂ and iron after gastrectomy — clinician to confirm");
     supplements.push("Vitamin D / B₁₂ only if clinically indicated — not routine");
     if (has(p.comorbidities, "renal")) supplements.push("Avoid potassium / phosphate-containing supplements unless prescribed");
 

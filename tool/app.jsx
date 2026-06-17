@@ -4,6 +4,7 @@ const BLANK = {
   consent: false, name: "", age: 58, sex: "Female",
   height: 162, currentWeight: 61, usualWeight: 66, usualUnknown: false, activity: "low",
   cancerType: "", stage: "", treatment: [],
+  gastricPhase: "", obstruction: false, elective: true, daysPostOp: 7, gastricComplication: false,
   comorbidities: [], otherConditions: "", medications: [],
   dietType: "Vegetarian", cuisine: "South Indian", mealsPerDay: "3", appetite: "good",
   lactose: false, gluten: false, intolerances: [], allergies: "",
@@ -22,6 +23,10 @@ const SAMPLES = [
   {
     label: "Imran S.", note: "Head & neck · radiation · mouth sores",
     data: { consent: true, name: "Imran S.", age: 64, sex: "Male", height: 171, currentWeight: 58, usualWeight: 68, usualUnknown: false, activity: "low", cancerType: "Head & neck", stage: "III", treatment: ["Radiation", "Chemotherapy"], comorbidities: [], otherConditions: "", medications: [], dietType: "Non-vegetarian", cuisine: "North Indian", mealsPerDay: "Small & frequent", appetite: "poor", lactose: false, gluten: false, intolerances: [], allergies: "", symptomList: ["mucositis", "dysphagia", "appetite"], severity: { mucositis: "severe", dysphagia: "moderate", appetite: "severe" } }
+  },
+  {
+    label: "Ramesh T.", note: "Gastric · post-gastrectomy · dumping",
+    data: { consent: true, name: "Ramesh T.", age: 63, sex: "Male", height: 168, currentWeight: 54, usualWeight: 64, usualUnknown: false, activity: "low", cancerType: "Gastric", stage: "III", treatment: ["Surgery", "Chemotherapy"], gastricPhase: "postop", obstruction: false, elective: true, daysPostOp: 8, gastricComplication: false, comorbidities: [], otherConditions: "", medications: ["Capecitabine"], dietType: "Vegetarian", cuisine: "North Indian", mealsPerDay: "Small & frequent", appetite: "poor", lactose: false, gluten: false, intolerances: [], allergies: "", symptomList: ["early_satiety", "dumping", "appetite"], severity: { early_satiety: "moderate", dumping: "moderate", appetite: "severe" } }
   }
 ];
 
@@ -54,6 +59,7 @@ function App() {
 
   const calc = useMemo(() => (phase !== "wizard" ? window.ONCO.calc(p) : null), [p, phase]);
   const sug = useMemo(() => (phase === "plan" && calc ? window.ONCO.suggest(p, calc) : null), [p, calc, phase]);
+  const gastric = useMemo(() => (phase !== "wizard" && calc && p.cancerType === "Gastric" ? window.ONCO.gastricAssessment(p, calc) : null), [p, calc, phase]);
 
   const meta = STEP_META[step - 1];
 
@@ -109,11 +115,11 @@ function App() {
         )}
 
         {phase === "review" && calc && (
-          <ReviewScreen p={p} calc={calc} onBack={() => { setPhase("wizard"); setStep(9); scrollTop(); }} onApprove={() => { setPhase("plan"); scrollTop(); }} />
+          <ReviewScreen p={p} calc={calc} gastric={gastric} onBack={() => { setPhase("wizard"); setStep(9); scrollTop(); }} onApprove={() => { setPhase("plan"); scrollTop(); }} />
         )}
 
         {phase === "plan" && calc && sug && (
-          <PlanScreen p={p} calc={calc} sug={sug} onReset={reset} />
+          <PlanScreen p={p} calc={calc} sug={sug} gastric={gastric} onReset={reset} />
         )}
       </main>
     </div>

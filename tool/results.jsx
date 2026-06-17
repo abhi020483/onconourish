@@ -1,7 +1,7 @@
 /* ===== OncoNourish Tool — clinician review + plan outputs ===== */
 
 /* ---------- Clinician review (the approval gate) ---------- */
-function ReviewScreen({ p, calc, onApprove, onBack }) {
+function ReviewScreen({ p, calc, gastric, onApprove, onBack }) {
   const initials = (p.name || "Patient").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
   const atRisk = calc.nutritional_risk === "AT_RISK";
   const t = calc.targets;
@@ -52,6 +52,8 @@ function ReviewScreen({ p, calc, onApprove, onBack }) {
         </div>
       </div>
 
+      {gastric && <GastricClinicalPanel g={gastric} />}
+
       <div className="approvebar">
         <div className="ap-txt"><Ico name="shieldCheck" size={20} />Nothing reaches the patient until you approve. You can adjust inputs first.</div>
         <div className="ap-act">
@@ -79,7 +81,7 @@ function JsonPeek({ calc }) {
 }
 
 /* ---------- Patient-facing approved plan ---------- */
-function PlanScreen({ p, calc, sug, onReset }) {
+function PlanScreen({ p, calc, sug, gastric, onReset }) {
   const [day, setDay] = useState(0);
   const days = useMemo(() => [0, 1, 2].map(i => window.ONCO.generateDay(p, calc, i)), [p, calc]);
   const d = days[day];
@@ -178,6 +180,8 @@ function PlanScreen({ p, calc, sug, onReset }) {
         </div>
       </div>
 
+      {gastric && <GastricDietBlock g={gastric} />}
+
       <div className="std-disclaimer">
         <Ico name="info" size={18} />
         <div>OncoNourish provides nutritional support guidance reviewed by a qualified clinician. It is not a substitute for medical advice and makes no claim to treat, cure, or arrest cancer. Energy and protein targets follow ESPEN clinical nutrition in cancer guidance (25–30 kcal/kg/day; protein &gt;1.0 up to 1.5 g/kg/day).</div>
@@ -186,4 +190,85 @@ function PlanScreen({ p, calc, sug, onReset }) {
   );
 }
 
-Object.assign(window, { ReviewScreen, PlanScreen });
+/* ---------- Gastric: clinician decision-support (NRS-2002 + nutrition route) ---------- */
+function GastricClinicalPanel({ g }) {
+  const nrs = g.nrs, rs = g.ruleSet;
+  return (
+    <div className="panel gastric-panel" style={{ marginBottom: 18 }}>
+      <div className="panel-head">
+        <h3><Ico name="clipboard" size={18} />Gastric pathway · {rs.label}</h3>
+        <span className="tagm">{rs.sources.join(" · ")}</span>
+      </div>
+      <div className="panel-body">
+        <div className="grid2" style={{ gridTemplateColumns: "minmax(0,1fr) minmax(0,1.2fr)" }}>
+          {/* NRS-2002 */}
+          <div>
+            <div className="sec-label"><span className="d" style={{ background: nrs.atRisk ? "var(--clay)" : "var(--sage)" }}></span>NRS-2002 nutritional risk</div>
+            <div className={"risk " + (nrs.atRisk ? "at" : "ok")} style={{ marginTop: 6 }}>
+              <span className="ri"><Ico name={nrs.atRisk ? "alert" : "shieldCheck"} size={22} /></span>
+              <div><b>Score {nrs.total} — {nrs.atRisk ? "At risk (≥3): start nutrition plan" : "Low risk (<3): rescreen weekly"}</b><span>{nrs.summary}</span></div>
+            </div>
+            <div className="nrs-rows">
+              <div className="nrs-row"><span>Nutritional status</span><b>{nrs.nutr}</b><i>{nrs.nutrText}</i></div>
+              <div className="nrs-row"><span>Disease severity</span><b>{nrs.disease}</b><i>{nrs.diseaseText}</i></div>
+              <div className="nrs-row"><span>Age</span><b>{nrs.age}</b><i>{nrs.ageText}</i></div>
+              <div className="nrs-row"><span>Est. oral intake</span><b>{nrs.intakePct}%</b><i>of estimated needs</i></div>
+            </div>
+            <div className="gtarget">Targets: <b>{rs.targets.energy_kcal_per_kg[0]}–{rs.targets.energy_kcal_per_kg[1]}</b> kcal/kg · <b>{rs.targets.protein_g_per_kg[0]}–{rs.targets.protein_g_per_kg[1]}</b> g protein/kg</div>
+          </div>
+          {/* Route algorithm */}
+          <div>
+            <div className="sec-label"><span className="d" style={{ background: "var(--green)" }}></span>Recommended nutrition route</div>
+            {g.primary
+              ? <div className="route-primary"><div className="rp-tag">{g.primary.route}</div><p>{g.primary.recommendation}</p></div>
+              : <div className="route-primary"><p>No route step matched — review inputs.</p></div>}
+            <div className="routesteps">
+              {g.steps.map((s, i) => (
+                <div className={"routestep" + (s.hit ? " match" : "") + (g.primary && s.idx === g.primary.idx ? " primary" : "")} key={i}>
+                  <span className="rs-ico"><Ico name={s.hit ? "check" : "chevron"} size={13} sw={2.4} /></span>
+                  <div><div className="rs-cond">{s.condition}</div><div className="rs-rec">{s.route}</div></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        {/* monitoring */}
+        <div className="grid2" style={{ marginTop: 14 }}>
+          <div>
+            <div className="sec-label"><span className="d" style={{ background: "var(--green)" }}></span>Monitor — labs</div>
+            <div className="guidance">{rs.monitoring.labs.map((l, i) => <div className="gline" key={i}><Ico name="list" size={16} /><span>{l}</span></div>)}</div>
+          </div>
+          <div>
+            <div className="sec-label"><span className="d" style={{ background: "var(--green)" }}></span>Monitor — clinical</div>
+            <div className="guidance">{rs.monitoring.clinical.map((l, i) => <div className="gline" key={i}><Ico name="heart" size={16} /><span>{l}</span></div>)}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Gastric: patient-facing diet pattern + Indian examples ---------- */
+function GastricDietBlock({ g }) {
+  const dp = g.ruleSet.diet_pattern;
+  return (
+    <div className="panel gastric-panel" style={{ marginTop: 16 }}>
+      <div className="panel-head"><h3><Ico name="utensils" size={18} />Gastric eating plan · {g.ruleSet.label}</h3><span className="tagm">{dp.meals_per_day} small meals/day</span></div>
+      <div className="panel-body">
+        <div className="guidance" style={{ marginBottom: 14 }}>
+          {dp.notes.map((n, i) => <div className="gline" key={i}><Ico name="check" size={16} sw={2.2} /><span>{n}</span></div>)}
+        </div>
+        <div className="gex-grid">
+          {dp.indian_food_examples.map((ex, i) => (
+            <div className="gex" key={i}>
+              <div className="gex-h">{ex.situation}</div>
+              <ul>{ex.items.map((it, j) => <li key={j}>{it}</li>)}</ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { ReviewScreen, PlanScreen, GastricClinicalPanel, GastricDietBlock });

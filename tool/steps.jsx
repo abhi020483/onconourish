@@ -22,6 +22,7 @@ function validateStep(step, p) {
     if (!p.currentWeight || p.currentWeight < 25 || p.currentWeight > 250) return "Please enter a weight between 25 and 250 kg.";
     if (!p.usualUnknown && p.usualWeight && (p.usualWeight < 25 || p.usualWeight > 250)) return "Please check the usual weight value.";
   }
+  if (step === 4 && p.cancerType === "Gastric" && !p.gastricPhase) return "Please choose the gastric treatment phase.";
   return null;
 }
 
@@ -108,6 +109,26 @@ function StepContent({ step, p, set, goTo }) {
         <Field label="Current treatment" optional help="Select all that apply.">
           <div className="chipset">{O.treatments.map(t => <Chk key={t} label={t} on={p.treatment.includes(t)} onClick={() => set("treatment", arrToggle(p.treatment, t))} />)}</div>
         </Field>
+        {p.cancerType === "Gastric" && (
+          <div className="gastric-path">
+            <div className="eyebrow-sm" style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>Gastric pathway <span className="mono" style={{ fontSize: 10, color: "var(--green)", background: "var(--mint)", border: "1px solid var(--line)", padding: "2px 7px", borderRadius: 6 }}>ESPEN / ESMO</span></div>
+            <Field label="Treatment phase" help="Drives NRS-2002 screening and the recommended nutrition route.">
+              <Seg options={O.gastricPhases} value={p.gastricPhase} onChange={v => set("gastricPhase", v)} sm />
+            </Field>
+            {p.gastricPhase === "preop" && (
+              <div className="row2">
+                <Field><ToggleRow title="Gastric-outlet obstruction" sub="Blocks adequate oral/enteral intake" on={p.obstruction} onClick={() => set("obstruction", !p.obstruction)} /></Field>
+                <Field><ToggleRow title="Elective surgery" sub="Planned, not emergency" on={p.elective} onClick={() => set("elective", !p.elective)} /></Field>
+              </div>
+            )}
+            {p.gastricPhase === "postop" && (
+              <div className="row2">
+                <Field label="Days since surgery"><Stepper value={p.daysPostOp} onChange={v => set("daysPostOp", v)} min={0} max={120} unit="days" /></Field>
+                <Field><ToggleRow title="Major complication" sub="Anastomotic leak / ileus / prolonged NPO" on={p.gastricComplication} onClick={() => set("gastricComplication", !p.gastricComplication)} /></Field>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
 
@@ -193,7 +214,7 @@ function StepContent({ step, p, set, goTo }) {
       const rows = [
         { step: 2, label: "About you", val: `${p.name || "—"} · ${p.age} yrs · ${p.sex}` },
         { step: 3, label: "Body measures", val: `${p.height} cm · ${p.currentWeight} kg · usual ${p.usualUnknown ? "not sure" : p.usualWeight + " kg"} · ${(O.activity.find(a => a.id === p.activity) || {}).label}` },
-        { step: 4, label: "Cancer & treatment", val: `${p.cancerType || "—"} · Stage ${p.stage || "—"}${p.treatment.length ? " · " + p.treatment.join(", ") : ""}` },
+        { step: 4, label: "Cancer & treatment", val: `${p.cancerType || "—"} · Stage ${p.stage || "—"}${p.cancerType === "Gastric" && p.gastricPhase ? " · " + (O.gastricPhases.find(g => g.id === p.gastricPhase) || {}).label : ""}${p.treatment.length ? " · " + p.treatment.join(", ") : ""}` },
         { step: 5, label: "Medical background", val: (p.comorbidities.length ? p.comorbidities.map(id => (O.comorbidities.find(c => c.id === id) || {}).label).join(", ") : "None") + (p.medications.length ? " · " + p.medications.length + " medication(s)" : "") },
         { step: 6, label: "How you're eating", val: `${p.dietType} · ${p.cuisine} · ${p.mealsPerDay} meals · ${(O.appetite.find(a => a.id === p.appetite) || {}).label} appetite` },
         { step: 7, label: "Intolerances", val: [p.lactose && "Lactose", p.gluten && "Gluten", ...p.intolerances].filter(Boolean).join(", ") || "None" },
