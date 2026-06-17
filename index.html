@@ -356,6 +356,10 @@
 
   /* ---------- footer ---------- */
   footer { background: var(--green-deep); color: #b9cec5; padding: 56px 0 30px; }
+  .cobrand { margin-top: 22px; display: flex; flex-direction: column; gap: 8px; }
+  .cobrand-label { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: #7fa394; }
+  .cobrand-chip { display: inline-flex; align-items: center; background: #fff; border-radius: 10px; padding: 9px 14px; width: max-content; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+  .cobrand-chip img { height: 26px; width: auto; display: block; }
   .foot-top { display: flex; justify-content: space-between; gap: 40px; flex-wrap: wrap; padding-bottom: 36px; border-bottom: 1px solid rgba(255,255,255,.1); }
   .foot-brand { max-width: 320px; }
   .foot-brand .brand { color: #fff; }
@@ -783,6 +787,10 @@
           Onco<b>Nourish</b>
         </a>
         <p>An AI-guided, clinician-prescribed nutrition companion for oncology patients. Supportive care — keeping patients nourished and strong enough to tolerate treatment.</p>
+        <div class="cobrand">
+          <span class="cobrand-label">A product of</span>
+          <span class="cobrand-chip"><img src="assets/onealphamed-logo.png" alt="OneAlphaMed" /></span>
+        </div>
       </div>
       <div class="foot-cols">
         <div class="foot-col">
